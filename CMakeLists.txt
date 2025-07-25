@@ -1,0 +1,6 @@
+cmake_minimum_required(VERSION 3.5)
+project( horn-schunck )
+find_package( OpenCV REQUIRED )
+include_directories( ${OpenCV_INCLUDE_DIRS} )
+add_executable( run run.cpp src/horn_schunck.cpp )
+target_link_libraries( run ${OpenCV_LIBS} )
