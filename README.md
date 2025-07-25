@@ -3,7 +3,7 @@ Simple C++ implementation of Horn-Schunck optical flow using OpenCV.
 
 **Note:**  
 This implementation is written with a focus on clarity and mathematical transparency rather than low-level optimizations.  
-But it should run on any CPU from 2010 or newer in real-time.
+But it should run in real-time on any CPU > then the year 2010.
 
 The original paper can be found here: [Determining optical flow](https://www.sciencedirect.com/science/article/abs/pii/0004370281900242)
 

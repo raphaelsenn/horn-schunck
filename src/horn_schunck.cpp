@@ -8,13 +8,13 @@ constexpr float GAUSSIAN_BLUR_STD = 0.0f;
 
 // Settings to draw optical flow
 constexpr float FLOW_ARROW_SCALE = 1.0f;
-// const cv::Scalar ARROW_COLOR(0, 255, 0);
 constexpr int LINE_THICKNESS = 1;
 constexpr int LINE_SHIFT = 0;
 constexpr int LINE_TYPE = cv::LINE_AA;
 constexpr double TIP_LENGTH = 0.2;
 
-Gradients calculateImageGradients(const cv::Mat& I1, const cv::Mat& I2)
+Gradients calculateImageGradients(const cv::Mat& I1, 
+                                  const cv::Mat& I2)
 {
   Gradients g;
   cv::Mat I1_gray, I2_gray;
@@ -26,8 +26,14 @@ Gradients calculateImageGradients(const cv::Mat& I1, const cv::Mat& I2)
   I2_gray.convertTo(I2_gray, CV_32F);
   
   // Smooth I1_gray and I2_gray for gradient computation 
-  cv::GaussianBlur(I1_gray, g.I1_smooth, cv::Size(GAUSSIAN_BLUR_SIZE, GAUSSIAN_BLUR_SIZE), GAUSSIAN_BLUR_STD);
-  cv::GaussianBlur(I2_gray, g.I2_smooth, cv::Size(GAUSSIAN_BLUR_SIZE, GAUSSIAN_BLUR_SIZE), GAUSSIAN_BLUR_STD);
+  cv::GaussianBlur(I1_gray, 
+                   g.I1_smooth, 
+                   cv::Size(GAUSSIAN_BLUR_SIZE, GAUSSIAN_BLUR_SIZE), 
+                   GAUSSIAN_BLUR_STD);
+  cv::GaussianBlur(I2_gray, 
+                   g.I2_smooth,
+                   cv::Size(GAUSSIAN_BLUR_SIZE, GAUSSIAN_BLUR_SIZE), 
+                   GAUSSIAN_BLUR_STD);
   
   // Calculate final gradients
   cv::Sobel(g.I1_smooth, g.Ix, CV_32F, 1, 0);
@@ -108,7 +114,14 @@ cv::Mat hornSchunckOpticalFlow(const cv::Mat& I1,
 
       cv::Point2f start(j, i);
       cv::Point2f end(j + FLOW_ARROW_SCALE * dx, i + FLOW_ARROW_SCALE * dy);
-      cv::arrowedLine(flow, start, end, flow_bgr.at<cv::Vec3b>(i, j), LINE_THICKNESS, LINE_TYPE, LINE_SHIFT, TIP_LENGTH);
+      cv::arrowedLine(flow, 
+                      start, 
+                      end, 
+                      flow_bgr.at<cv::Vec3b>(i, j), 
+                      LINE_THICKNESS, 
+                      LINE_TYPE, 
+                      LINE_SHIFT, 
+                      TIP_LENGTH);
     }
   }
   return flow;

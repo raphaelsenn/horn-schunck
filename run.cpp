@@ -50,9 +50,9 @@ int main(int argc, char **argv)
       std::cout << "[ERROR] Blank frame grabbed.\n";
       break;
     }
-    // Calculating optical flow based on lucas-kanade 
+    // Calculating optical flow based on horn-schunck 
     cv::Mat flow = hornSchunckOpticalFlow(I1, I2);
-    cv::imshow("Lucas-Kanade method for Optical Flow", flow);
+    cv::imshow("Horn-Schunck method for Optical Flow", flow);
     
     I1 = I2.clone();
     if (cv::waitKey(5) >= 0)
