@@ -7,11 +7,15 @@ constexpr int GAUSSIAN_BLUR_SIZE = 3;
 constexpr float GAUSSIAN_BLUR_STD = 0.0f;
 
 // Settings to draw optical flow
-constexpr float FLOW_ARROW_SCALE = 1.0f;
+constexpr float FLOW_ARROW_SCALE = 4.0f;
 constexpr int LINE_THICKNESS = 1;
+const cv::Scalar ARROW_COLOR(0, 255, 0);
 constexpr int LINE_SHIFT = 0;
 constexpr int LINE_TYPE = cv::LINE_AA;
 constexpr double TIP_LENGTH = 0.2;
+
+// Settings for sparse drawing
+constexpr int STEPSIZE = 10; // Pixel step size
 
 Gradients calculateImageGradients(const cv::Mat& I1, 
                                   const cv::Mat& I2)
@@ -46,7 +50,7 @@ cv::Mat hornSchunckOpticalFlow(const cv::Mat& I1,
                                const cv::Mat& I2,
                                int maxIter,
                                float alpha,
-                               bool dense)
+                               bool hue)
 {
   // Calculate image gradients
   Gradients g  = calculateImageGradients(I1, I2);
@@ -76,52 +80,50 @@ cv::Mat hornSchunckOpticalFlow(const cv::Mat& I1,
     u -= du;
     v -= dv;
   }
-  
-  // Compute polar representation
-  cv::Mat magnitude, angle;
-  cv::cartToPolar(u, v, magnitude, angle, true);
-  
-  // Normalize magnitude and convert angle to HSV hue range
-  // Inspired by: https://docs.opencv.org/4.x/d4/dee/tutorial_optical_flow.html
-  cv::Mat norm;
-  cv::normalize(magnitude, norm, 0.0f, 1.0f, cv::NORM_MINMAX);
-  angle *= ((1.f / 360.f) * (180.f / 255.f));
-  
-  // Prepare HSV image
-  cv::Mat _hsv[3], hsv, hsv8, flow_bgr;
-  _hsv[0] = angle;
-  _hsv[1] = cv::Mat::ones(angle.size(), CV_32F);
-  _hsv[2] = norm;
-  cv::merge(_hsv, 3, hsv);
-  hsv.convertTo(hsv8, CV_8U, 255.0);
-  cv::cvtColor(hsv8, flow_bgr, cv::COLOR_HSV2BGR);
-  
-  // Draw dense optical flow 
-  if (dense)
-    return flow_bgr;
-  
-  // Draw sparse optical flow
-  #pragma omp parallel for collapse(2)
-  for (std::size_t i = 0; i < I1.rows ; i++)
+  // Draw rgb-hue dense optical flow 
+  if (hue)
   {
-    for (std::size_t j = 0; j < I2.cols; j++)
+    // Compute polar representation
+    cv::Mat magnitude, angle;
+    cv::cartToPolar(u, v, magnitude, angle, true);
+    
+    // Normalize magnitude and convert angle to HSV hue range
+    // Inspired by: https://docs.opencv.org/4.x/d4/dee/tutorial_optical_flow.html
+    cv::Mat norm;
+    cv::normalize(magnitude, norm, 0.0f, 1.0f, cv::NORM_MINMAX);
+    angle *= ((1.f / 360.f) * (180.f / 255.f));
+    
+    // Prepare HSV image
+    cv::Mat _hsv[3], hsv, hsv8, flow_bgr;
+    _hsv[0] = angle;
+    _hsv[1] = cv::Mat::ones(angle.size(), CV_32F);
+    _hsv[2] = norm;
+    cv::merge(_hsv, 3, hsv);
+    hsv.convertTo(hsv8, CV_8U, 255.0);
+    cv::cvtColor(hsv8, flow_bgr, cv::COLOR_HSV2BGR); 
+    
+    return flow_bgr;
+  }    
+  // Draw vanilla dense optical flow
+  #pragma omp parallel for collapse(2)
+  for (std::size_t i = 0; i < I1.rows ; i+=STEPSIZE)
+  {
+    for (std::size_t j = 0; j < I2.cols; j+=STEPSIZE)
     {
       float dx = u.at<float>(i, j);
       float dy = v.at<float>(i, j);
 
       float mag = std::hypot(dx, dy);
-      if (mag < 0.5) continue;
-
       cv::Point2f start(j, i);
-      cv::Point2f end(j + FLOW_ARROW_SCALE * dx, i + FLOW_ARROW_SCALE * dy);
-      cv::arrowedLine(flow, 
-                      start, 
-                      end, 
-                      flow_bgr.at<cv::Vec3b>(i, j), 
-                      LINE_THICKNESS, 
-                      LINE_TYPE, 
-                      LINE_SHIFT, 
-                      TIP_LENGTH);
+      
+      if (mag < 1.0f)
+        cv::circle(flow, start, 1, ARROW_COLOR, cv::FILLED);
+
+      else {
+        cv::Point2f end(j + FLOW_ARROW_SCALE * dx, i + FLOW_ARROW_SCALE * dy);
+        cv::line(flow, start, end, ARROW_COLOR, LINE_THICKNESS, LINE_TYPE, LINE_SHIFT);
+        cv::circle(flow, end, 2, ARROW_COLOR, cv::FILLED);
+      }
     }
   }
   return flow;

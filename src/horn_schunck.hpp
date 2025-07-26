@@ -21,5 +21,5 @@ Gradients calculateImageGradients(const cv::Mat& I1,  // First image (frame t)
 cv::Mat hornSchunckOpticalFlow(const cv::Mat& I1,     // First image (frame t)
                                const cv::Mat& I2,     // Second image (frame t+1)
                                int maxIter=1,         // Maximum number of iterations
-                               float alpha=10.f,      // Regularization constant (larger values -> smoother flow)
-                               bool dense = true);    // Dense or sparse optical flow
+                               float alpha=8.f,       // Regularization constant (larger values -> smoother flow)
+                               bool hue = true);      // rgb hue sparse optical flow

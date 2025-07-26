@@ -41,6 +41,9 @@ int main(int argc, char **argv)
   }
   int WIDTH = static_cast<int>(cap.get(cv::CAP_PROP_FRAME_WIDTH));
   int HEIGHT = static_cast<int>(cap.get(cv::CAP_PROP_FRAME_HEIGHT));
+  bool hue = true;
+  int maxIter = 1;
+  float alpha = 10.0f;
   std::cout << "Start running a " << WIDTH << "x" << HEIGHT << " video stream.\n";
   while (true)
   {
@@ -51,12 +54,16 @@ int main(int argc, char **argv)
       break;
     }
     // Calculating optical flow based on horn-schunck 
-    cv::Mat flow = hornSchunckOpticalFlow(I1, I2);
+    cv::Mat flow = hornSchunckOpticalFlow(I1, I2, maxIter, alpha, hue);
     cv::imshow("Horn-Schunck method for Optical Flow", flow);
-    
     I1 = I2.clone();
-    if (cv::waitKey(5) >= 0)
+
+    int key = cv::waitKey(5);
+    if (key == 'q')
       break;
+
+    if (key == 'd')
+      hue = !hue;
   }  
   return 0;
 }
