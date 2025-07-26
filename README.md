@@ -8,10 +8,12 @@ But it should run in real-time on any CPU > then the year 2010.
 The original paper can be found here: [Determining optical flow](https://www.sciencedirect.com/science/article/abs/pii/0004370281900242)
 
 ![dense_optical_flow_gif](./assets/dense_optical_flow.gif)
-*Showing dense optical flow using horn-schunck method; Raw video taken from https://www.youtube.com/watch?v=zOq2XdwHGT0*
+
+*Showing dense (hue) optical flow using horn-schunck method; Raw video taken from https://www.youtube.com/watch?v=zOq2XdwHGT0*
 
 ![sparse_optical_flow_gif](./assets/sparse_optical_flow.gif)
-*Showing sparse optical flow using horn-schunck method; Raw video taken from https://www.youtube.com/watch?v=zOq2XdwHGT0*
+
+*Showing dense optical flow using horn-schunck method; Raw video taken from https://www.youtube.com/watch?v=zOq2XdwHGT0*
 
 We calculate the optical flow by minimizing the energy in Equation (1).
 For more details, see the [Horn-Schunck method](https://en.wikipedia.org/wiki/Horn%E2%80%93Schunck_method) on Wikipedia.
